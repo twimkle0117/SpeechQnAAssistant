@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechChatAssistant.Demo.Web", "SpeechChatAssistant.Demo.Web\SpeechChatAssistant.Demo.Web.csproj", "{1DEF9D14-C3E9-46F1-A55F-BDF3A4B740B4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SS.Common.AI", "SS.Common.AI\SS.Common.AI.csproj", "{2A831FAE-F959-4C61-B151-6F22364E12C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DEF9D14-C3E9-46F1-A55F-BDF3A4B740B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DEF9D14-C3E9-46F1-A55F-BDF3A4B740B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DEF9D14-C3E9-46F1-A55F-BDF3A4B740B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DEF9D14-C3E9-46F1-A55F-BDF3A4B740B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A831FAE-F959-4C61-B151-6F22364E12C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A831FAE-F959-4C61-B151-6F22364E12C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A831FAE-F959-4C61-B151-6F22364E12C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A831FAE-F959-4C61-B151-6F22364E12C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53C8D76E-826E-4E05-8127-17A1FA1F4BB6}
+	EndGlobalSection
+EndGlobal

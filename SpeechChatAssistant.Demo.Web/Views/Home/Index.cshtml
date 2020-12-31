@@ -1,0 +1,314 @@
+﻿@{
+    ViewData["Title"] = "Speech Chat Assistant";
+}
+
+
+<div class="page-part">
+    <div class="ContextBox">
+        <div v-for="Item in ContextList" class="ContextItem">
+            <div v-if="Item.Type=='Input'" class="input">
+                <div v-if="Item.InputType=='Text'"> Input: {{Item.Text}}</div>
+                <div v-if="Item.InputType=='Audio'">
+                    Input Audio:
+                    <audio controls :src="Item.Url"></audio>
+                    <div v-if="Item.Text!=''">
+                        STT Result:
+                        {{Item.Text}}
+                    </div>
+                </div>
+            </div>
+            <div v-if="Item.Type=='Output'" class="output">
+                <div v-if="Item.ResultType=='QnA'">
+                    QnA Result: {{Item.Result}}
+                </div>
+                <div v-if="Item.ResultType=='Luis'">
+                    Luis Result: <pre>{{Item.Result}}</pre>
+                </div>
+                <div v-if="Item.ResultType=='Audio'">
+                    QnA Audio Result:
+                    <audio controls :src="'/'+Item.Result" autoplay></audio>
+                    <div v-if="Item.ResultText!=''">
+                        QnA Text Result:
+                        {{Item.ResultText}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-part touch_action">
+    <div class="FormBox touch_action">
+        <div style="padding-bottom:5px; font-size:12px;">
+            <label>Input Type:</label>
+            <input type="radio" id="r1" name="inputType" value="1" v-model="IsText" />
+            <label for="r1">Text</label>
+            <input type="radio" id="r2" name="inputType" value="2" v-model="IsText" />
+            <label for="r2">Audio</label>
+        </div>
+        <div style="padding-bottom:5px;font-size:12px;">
+            <label>Output Type:</label>
+            <input type="radio" id="r3" name="outputType" value="0" v-model="OutputType" />
+            <label for="r3">Auto</label>
+            <input type="radio" id="r4" name="outputType" value="1" v-model="OutputType" />
+            <label for="r4">Text</label>
+            <input type="radio" id="r5" name="outputType" value="2" v-model="OutputType" />
+            <label for="r5">Audio</label>
+        </div>
+        <div v-show="IsText==1">
+            <form onsubmit="return false;">
+                <div>
+                    <span v-for="txt in DemoInputList" @@click="InputText=txt" style="cursor:pointer; color:blue;font-size:12px;"> - {{txt}} &nbsp;</span>
+                </div>
+                <div style="width: 100%; height:35px;">
+                    <div style="width: 75%; height:35px; float: left;">
+                        <input type="text" v-model="InputText" style="width:100%;height:24px;" />
+                    </div>
+                    <div style="float:right; height:35px;width:22%;text-align:right;">
+                        <button type="submit" @@click="submitClick" :disabled="IsLoading" style="width: 100%; height: 30px;">{{IsLoading?'Loading':'Submit'}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div v-show="IsText==2" class="touch_action">
+            <div v-show="IsPC">
+                <button class="touch_action" onmousedown="Start()" onmouseup="Stop()" :disabled="IsLoading" style="width:100%;height:30px;">{{IsLoading?'Loading':(IsRecording?'Listening':'Hold to Talk')}}</button>
+            </div>
+            <div v-show="!IsPC" class="touch_action">
+                <button class="touch_action" ontouchstart="Start()" ontouchend="Stop()" :disabled="IsLoading" style="width:100%;height:30px;">{{IsLoading?'Loading':(IsRecording?'Listening':'Hold to Talk')}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-part"></div>
+
+@section Scripts {
+    <style>
+        .FormBox {
+            width: 90%;
+            margin: 0 auto 0;
+            box-sizing: border-box;
+        }
+
+        .ContextBox {
+            width: 90%;
+            margin: 0 auto 0;
+            border: solid 1px #666666;
+            box-sizing: border-box;
+            min-height: 20px;
+            font-size: 14px;
+        }
+
+        .ContextItem {
+            width: 100%;
+            border-bottom: solid 1px #cccccc;
+            padding: 5px 5px;
+            box-sizing: border-box;
+        }
+
+            .ContextItem .input {
+                text-align: right;
+                box-sizing: border-box;
+            }
+
+            .ContextItem .output {
+                text-align: left;
+                box-sizing: border-box;
+            }
+
+        .touch_action {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+    <script>
+        var vueOption = {
+            data: {
+                IsLoading: false,
+                IsRecording: false,
+                IsText: 1,
+                OutputType: 0,
+                InputText: "",
+                ContextList: [],
+                DemoInputList: [
+                    "hi! how old are you!",
+                    "trun off the tv",
+                    "What's the weather like in New York",
+                    "hi, good morning",
+                    "what are you",
+                    "what do you do",
+                    "turn on bedroom light",
+                    "turn off bedroom light",
+                    "make some coffee",
+                    "whats the weather in redmond washington",
+                    "what's the forecast for london",
+                    "show me the forecast for nebraska"
+                ]
+            },
+            methods: {
+                submitClick: function () {
+                    if (this.IsLoading) {
+                        return;
+                    }
+                    var _this = this;
+                    var data = { InputText: _this.InputText.trim(), OutputType: _this.OutputType };
+                    if (data.InputText == "") { return; }
+                    _this.IsLoading = true;
+                    var inputItem = { Text: data.InputText, Type: "Input", InputType: "Text" };
+                    _this.ContextList.push(inputItem);
+                    _this.InputText = "";
+                    axios({
+                        method: 'post',
+                        url: '/Logic/Handle',
+                        data: data
+                    }).then(function (response) {
+                        _this.IsLoading = false;
+                        var outputItem = { Result: response.data.Result, ResultType: response.data.ResultType, ResultText: response.data.ResultText, Type: "Output" };
+                        _this.ContextList.push(outputItem);
+                    }).catch(function (error) {
+                        _this.IsLoading = false;
+                        console.log(error);
+                    });
+                },
+                UploadFunc: function (obj) {
+                    if (this.IsLoading) {
+                        return;
+                    }
+                    var _this = this;
+                    _this.IsLoading = true;
+                    var inputItem = { Text: "", Url: obj.url, Type: "Input", InputType: "Audio" };
+                    _this.ContextList.push(inputItem);
+                    //obj.blob
+                    var form = new FormData();
+                    form.append("fileUploader", obj.blob, "recorder.mp3");
+                    form.append("OutputType", _this.OutputType)
+                    axios({
+                        method: 'post',
+                        url: '/Logic/Upload',
+                        headers: { 'content-type': 'multipart/form-data' },
+                        data: form
+                    }).then(function (response) {
+                        _this.IsLoading = false;
+                        console.log("UploadFunc response:");
+                        console.log(response);
+                        inputItem.Text = response.data.InputText;
+                        var outputItem = { Result: response.data.Result, ResultType: response.data.ResultType, ResultText: response.data.ResultText, Type: "Output" };
+                        _this.ContextList.push(outputItem);
+                    }).catch(function (error) {
+                        _this.IsLoading = false;
+                        console.log(error);
+                    });
+                }
+            },
+            computed: {
+                IsPC: function () {
+                    var userAgentInfo = navigator.userAgent;
+                    var Agents = ["Android", "iPhone",
+                        "SymbianOS", "Windows Phone",
+                        "iPad", "iPod"];
+                    var flag = true;
+                    for (var v = 0; v < Agents.length; v++) {
+                        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    return flag;
+                }
+            },
+            watch: {
+            },
+            created: function () {
+            },
+            mounted: function () {
+            }
+        };
+    </script>
+    <script>
+        //简单控制台直接测试方法：在任意(无CSP限制)页面内加载Recorder，加载成功后再执行一次本代码立即会有效果，import("https://xiangyuecn.gitee.io/recorder/recorder.mp3.min.js").then(function(s){console.log("import ok")}).catch(function(e){console.error("import fail",e)})
+
+        var rec;
+        /**调用open打开录音请求好录音权限**/
+        var recOpen = function (success) {//一般在显示出录音按钮或相关的录音界面时进行此方法调用，后面用户点击开始录音时就能畅通无阻了
+            rec = Recorder({
+                type: "mp3", sampleRate: 16000, bitRate: 16 //mp3格式，指定采样率hz、比特率kbps，其他参数使用默认配置；注意：是数字的参数必须提供数字，不要用字符串；需要使用的type类型，需提前把格式支持文件加载进来，比如使用wav格式需要提前加载wav.js编码引擎
+                , onProcess: function (buffers, powerLevel, bufferDuration, bufferSampleRate, newBufferIdx, asyncEnd) {
+                    //录音实时回调，大约1秒调用12次本回调
+                    //可利用extensions/waveview.js扩展实时绘制波形
+                    //可利用extensions/sonic.js扩展实时变速变调，此扩展计算量巨大，onProcess需要返回true开启异步模式
+                }
+            });
+
+            //var dialog=createDelayDialog(); 我们可以选择性的弹一个对话框：为了防止移动端浏览器存在第三种情况：用户忽略，并且（或者国产系统UC系）浏览器没有任何回调，此处demo省略了弹窗的代码
+            rec.open(function () {//打开麦克风授权获得相关资源
+                //dialog&&dialog.Cancel(); 如果开启了弹框，此处需要取消
+                //rec.start() 此处可以立即开始录音，但不建议这样编写，因为open是一个延迟漫长的操作，通过两次用户操作来分别调用open和start是推荐的最佳流程
+
+                success && success();
+            }, function (msg, isUserNotAllow) {//用户拒绝未授权或不支持
+                //dialog&&dialog.Cancel(); 如果开启了弹框，此处需要取消
+                console.log((isUserNotAllow ? "UserNotAllow，" : "") + "无法录音:" + msg);
+            });
+        };
+
+        /**开始录音**/
+        function recStart() {//打开了录音后才能进行start、stop调用
+            rec.start();
+        };
+
+        /**结束录音**/
+        function recStop() {
+            rec.stop(function (blob, duration) {
+                console.log(blob, (window.URL || webkitURL).createObjectURL(blob), "时长:" + duration + "ms");
+                rec.close();//释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时系统或浏览器会一直提示在录音，最佳操作是录完就close掉
+                rec = null;
+
+                //已经拿到blob文件对象想干嘛就干嘛：立即播放、上传
+
+                //简单利用URL生成播放地址，注意不用了时需要revokeObjectURL，否则霸占内存
+                var url = (window.URL || webkitURL).createObjectURL(blob);
+
+                var obj = { url: url, blob: blob, duration: duration };
+                vueApp.UploadFunc(obj);
+
+            }, function (msg) {
+                console.log("录音失败:" + msg);
+                rec.close();//可以通过stop方法的第3个参数来自动调用close
+                rec = null;
+            });
+        };
+
+
+        //我们可以选择性的弹一个对话框：为了防止移动端浏览器存在第三种情况：用户忽略，并且（或者国产系统UC系）浏览器没有任何回调
+        /*伪代码：
+        function createDelayDialog(){
+            if(Is Mobile){//只针对移动端
+                return new Alert Dialog Component
+                    .Message("录音功能需要麦克风权限，请允许；如果未看到任何请求，请点击忽略~")
+                    .Button("忽略")
+                    .OnClick(function(){//明确是用户点击的按钮，此时代表浏览器没有发起任何权限请求
+                        //此处执行fail逻辑
+                        console.log("无法录音：权限请求被忽略");
+                    })
+                    .OnCancel(NOOP)//自动取消的对话框不需要任何处理
+                    .Delay(8000); //延迟8秒显示，这么久还没有操作基本可以判定浏览器有毛病
+            };
+        };
+        */
+
+        function Start() {
+            vueApp.IsRecording = true;
+            recOpen(function () {
+                recStart();
+            });
+        }
+        function Stop() {
+            recStop();
+            vueApp.IsRecording = false;
+        }
+
+    </script>
+}

@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <environment include="Local,Development">
+
+    </environment>
+    <environment exclude="Local,Development">
+
+    </environment>
+
+    @RenderSection("Libs", required: false)
+
+    <link rel="stylesheet" href="~/css/site.css?t=1" />
+    <script src="~/js/site.js?t=1"></script>
+</head>
+<body>
+    <div id="vueApp" class="page-main" style="display:none;">
+        <div class="page-content">
+            @RenderBody()
+        </div>
+    </div>
+</body>
+
+<environment include="Local,Development">
+    <script src="~/lib/vue@2.6.12/vue.min.js"></script>
+    <script src="~/lib/axios@0.20.0/axios.min.js"></script>
+    <script src="~/lib/polyfill@7.12.1/polyfill.min.js"></script>
+    <script src="~/lib/Recorder/recorder.mp3.min.js"></script>
+</environment>
+<environment exclude="Local,Development">
+    <script src="~/lib/vue@2.6.12/vue.min.js"></script>
+    <script src="~/lib/axios@0.20.0/axios.min.js"></script>
+    <script src="~/lib/polyfill@7.12.1/polyfill.min.js"></script>
+    <script src="~/lib/Recorder/recorder.mp3.min.js"></script>
+</environment>
+
+<script>
+
+</script>
+
+@RenderSection("Scripts", required: false)
+
+<script>
+    var defaultOption = {
+        el: '#vueApp',
+        data: {
+        },
+        watch: {
+
+        },
+        computed: {
+
+        },
+        methods: {
+            goBack: function () {
+                history.back();
+            }
+        }
+    };
+
+    for (var item in defaultOption.data) {
+        if (vueOption.data[item] == undefined) {
+            vueOption.data[item] = defaultOption.data[item];
+        }
+    }
+    for (var item in defaultOption.computed) {
+        if (vueOption.computed[item] == undefined) {
+            vueOption.computed[item] = defaultOption.computed[item];
+        }
+    }
+    for (var item in defaultOption.methods) {
+        if (vueOption.methods[item] == undefined) {
+            vueOption.methods[item] = defaultOption.methods[item];
+        }
+    }
+    for (var item in defaultOption.watch) {
+        if (vueOption.watch[item] == undefined) {
+            vueOption.watch[item] = defaultOption.watch[item];
+        }
+    }
+    vueOption.el = defaultOption.el;
+    var vueApp = new Vue(vueOption);
+    document.getElementById("vueApp").style.display = "block";
+</script>
+
+</html>

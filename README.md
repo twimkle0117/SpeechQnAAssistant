@@ -13,6 +13,7 @@ LUIS Service:
 https://docs.microsoft.com/en-us/azure/cognitive-services/luis/luis-get-started-create-app#sign-in-to-luis-portal
 
 ## Getting the samples
+Download .zip file, extract all.
 
 ## Configuration
 #### Speech service configuration (./SS.Common.AI/SpeechHelper.cs): 

@@ -38,4 +38,4 @@ All LUIS service related operations are defined here.
 
 ## Run the project
 The result should be like this:
-![Image]:(https://github.com/twimkle0117/SpeechQnAAssistant/blob/main/Result.PNG)
+![image](https://github.com/twimkle0117/SpeechQnAAssistant/blob/main/Result.PNG)
